@@ -10,6 +10,7 @@ import 'bulma/css/bulma.min.css';
 import styles from './App.module.css';
 
 import Dashboard from './pages/Dashboard';
+import AlertsPage from './pages/Alerts';
 
 function App() {
   return (
@@ -30,7 +31,7 @@ function App() {
             <Dashboard />
           </Route>
           <Route path="/alerts">
-            <h2 className="subtitle">Alerts</h2>
+            <AlertsPage />
           </Route>
           <Redirect from={`/`} to={`/stocks`} />
         </Switch>

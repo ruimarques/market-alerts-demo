@@ -19,15 +19,26 @@ const StockSelectorComponent = (props: StockSelectorProps) => {
 
   return (
     <>
-      <div className={`select is-small ${styles.selectContainer}`}>
-        <select value={selection} onChange={handleSelection}>
-          {['', ...props.symbols.sort()].map((symbol, index) => (
-            <option key={symbol + index} value={symbol}>
-              {symbol}
-            </option>
-          ))}
-        </select>
+      <div className="field">
+        <label className="label" htmlFor="SelectSymbol">
+          Add Symbol:
+        </label>
+        <div className="control">
+          <div
+            className={`select is-small ${styles.selectContainer}`}
+            id="SelectSymbol"
+          >
+            <select value={selection} onChange={handleSelection}>
+              {[...props.symbols.sort()].map((symbol, index) => (
+                <option key={symbol + index} value={symbol}>
+                  {symbol}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
+
       <button
         onClick={handleAdd}
         disabled={!selection}

@@ -64,7 +64,6 @@ const Dashboard = () => {
     fetch(`${API_URL}/static/tickers`)
       .then((d) => d.json())
       .then((d) => {
-        // console.log(d);
         setSymbols(d);
       });
   }, []);

@@ -1,0 +1,19 @@
+.checkboxContainer {
+  margin-bottom: 8px;
+}
+
+.checkboxContainer,
+.percentage {
+  display: flex;
+  align-items: center;
+}
+
+.checkboxContainer input,
+.percentage input {
+  margin-right: 5px;
+}
+
+.percentage label {
+  font-weight: 600;
+  font-size: 16px;
+}
