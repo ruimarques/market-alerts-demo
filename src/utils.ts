@@ -24,3 +24,7 @@ export const formatCurrency = (amount: number, currency = 'USD') => {
 export const randomIntFromInterval = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1) + min);
 };
+
+// function financial(n: string, decimals: number) {
+//   return Number.parseFloat(n).toFixed(2);
+// }

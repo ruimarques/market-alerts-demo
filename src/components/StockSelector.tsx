@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import styles from './StockSelector.module.css';
 
 interface StockSelectorProps {
   symbols: string[];
@@ -18,14 +19,20 @@ const StockSelectorComponent = (props: StockSelectorProps) => {
 
   return (
     <>
-      <select value={selection} onChange={handleSelection}>
-        {['', ...props.symbols.sort()].map((symbol, index) => (
-          <option key={symbol + index} value={symbol}>
-            {symbol}
-          </option>
-        ))}
-      </select>
-      <button type="submit" onClick={handleAdd} disabled={!selection}>
+      <div className={`select is-small ${styles.selectContainer}`}>
+        <select value={selection} onChange={handleSelection}>
+          {['', ...props.symbols.sort()].map((symbol, index) => (
+            <option key={symbol + index} value={symbol}>
+              {symbol}
+            </option>
+          ))}
+        </select>
+      </div>
+      <button
+        onClick={handleAdd}
+        disabled={!selection}
+        className="button is-small is-link is-outlined"
+      >
         Add
       </button>
     </>

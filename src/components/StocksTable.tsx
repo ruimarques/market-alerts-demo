@@ -7,6 +7,7 @@ export interface StockTick {
 
 interface StocksTableProps {
   items: StockTick[];
+  editAlert: (s: string) => void;
 }
 
 const StocksTableComponent = (props: StocksTableProps) => {
@@ -29,8 +30,20 @@ const StocksTableComponent = (props: StocksTableProps) => {
             <td>{bid}</td>
             <td>{ask}</td>
             <td>{lastVol}</td>
-            <td>{''}</td>
-            <td>{''}</td>
+            <td>
+              <label className="checkbox">
+                <input type="checkbox" disabled />
+              </label>
+            </td>
+            <td>
+              <button
+                className="button is-ghost is-small"
+                onClick={() => props.editAlert(symbol)}
+              >
+                Alerts
+              </button>
+              <button className="button is-ghost is-small">Clear</button>
+            </td>
           </tr>
         ))}
       </tbody>

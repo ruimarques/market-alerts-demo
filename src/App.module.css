@@ -1,9 +1,19 @@
 .container {
-  display: flex;
-  padding: 24px 46px;
+  padding: 24px;
 }
 
-.content {
-  width: 100%;
-  padding-left: 88px;
+.navigation {
+  display: flex;
+  padding-bottom: 30px;
+  justify-content: center;
+}
+
+.navigation :global(.button) {
+  margin-right: 5px;
+}
+
+.navigation :global(.button):global(.active) {
+  border-color: #3e8ed0;
+  background-color: #3e8ed0;
+  color: #fff;
 }
