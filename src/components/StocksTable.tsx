@@ -3,13 +3,14 @@ export interface StockTick {
   bid: string;
   ask: string;
   open: string;
-  lastVol: string;
+  lastVol: number;
   hasAlerts: boolean;
 }
 
 interface StocksTableProps {
   items: StockTick[];
   editAlert: (s: string) => void;
+  clearAlert: (s: string) => void;
 }
 
 const StocksTableComponent = (props: StocksTableProps) => {
@@ -44,7 +45,12 @@ const StocksTableComponent = (props: StocksTableProps) => {
               >
                 Alerts
               </button>
-              <button className="button is-ghost is-small">Clear</button>
+              <button
+                className="button is-ghost is-small"
+                onClick={() => props.clearAlert(symbol)}
+              >
+                Clear
+              </button>
             </td>
           </tr>
         ))}

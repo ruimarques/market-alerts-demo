@@ -66,6 +66,7 @@ const AlertModalComponent = (props: AlertModalProps) => {
               className="input"
               type="number"
               value={input}
+              min="0"
               onInput={(e) => {
                 setInput(+e.currentTarget.value);
               }}
