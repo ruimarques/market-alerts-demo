@@ -1,10 +1,15 @@
 import { useState } from 'react';
 import styles from './AlertModal.module.css';
 
+export interface AlertConfig {
+  symbol: string;
+  percentage: number;
+}
+
 interface AlertModalProps {
   isActive: boolean;
   symbolKey: string;
-  onDone: (s: string, p: number) => void;
+  onDone: (c: AlertConfig) => void;
   onClose: () => void;
 }
 
@@ -16,7 +21,10 @@ const AlertModalComponent = (props: AlertModalProps) => {
 
   const handleOk = () => {
     if (checked) {
-      props.onDone(props.symbolKey, input);
+      props.onDone({
+        symbol: props.symbolKey,
+        percentage: input,
+      });
     }
     closeModal();
   };

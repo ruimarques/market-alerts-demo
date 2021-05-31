@@ -7,7 +7,9 @@ interface StockSelectorProps {
 }
 
 const StockSelectorComponent = (props: StockSelectorProps) => {
-  const [selection, setSelection] = useState('');
+  const [selection, setSelection] = useState(
+    props.symbols.length > 0 ? props.symbols[0] : ''
+  );
 
   const handleSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelection(e.target.value);

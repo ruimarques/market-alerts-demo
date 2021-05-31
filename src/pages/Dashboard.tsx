@@ -1,8 +1,10 @@
 import StocksTableComponent, { StockTick } from '../components/StocksTable';
 import StockSelectorComponent from '../components/StockSelector';
-import AlertModalComponent from '../components/AlertModal';
+import AlertModalComponent, { AlertConfig } from '../components/AlertModal';
 import { useEffect, useState } from 'react';
 import { API_URL } from '../constants';
+
+const TICK_TIME = 5000;
 
 const Dashboard = () => {
   const [symbols, setSymbols] = useState<string[]>([]);
@@ -10,51 +12,75 @@ const Dashboard = () => {
   const [symbolPrices, setSymbolPrices] = useState<StockTick[]>([]);
 
   // Alerts state
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [alertSymbol, setAlertSymbol] = useState('');
+  const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
+  const [alertModalSymbol, setAlertSymbol] = useState('');
+  const [alerts, setAlerts] = useState<AlertConfig[]>([]);
 
   const getPrices = (symbols: string[]) => {
-    fetch(`${API_URL}/prices/${symbols.join(',')}`)
+    return fetch(`${API_URL}/prices/${symbols.join(',')}`)
       .then((d) => d.json())
-      .then((d) => {
-        console.log('getPrices ', d);
-        setSymbolPrices(d);
+      .then((data: StockTick[]) => {
+        console.log('getPrices', data);
+        // TODO set alert status > hasAlerts
+        setSymbolPrices(data);
+        return data;
       });
   };
 
-  const handleAdd = (item: string) => {
-    selectedSymbols.includes(item);
-    const updated = selectedSymbols.includes(item)
+  const handleAdd = (symbol: string) => {
+    // Only adds new ticker if not present in the list
+    const updated = selectedSymbols.includes(symbol)
       ? selectedSymbols
-      : [...selectedSymbols, item];
+      : [...selectedSymbols, symbol];
 
     setSelectedSymbols(updated);
     sessionStorage.setItem('symbols', JSON.stringify(updated));
-
-    console.log('add', item);
 
     getPrices(updated);
   };
 
   const handleEditAlert = (symbol: string) => {
     setAlertSymbol(symbol);
-    setIsAlertOpen(true);
+    setIsAlertModalOpen(true);
   };
 
-  const handleAlertDone = (symbol: string, percent: number) => {
-    console.log('handleAlertDone', symbol, percent);
+  const handleAlertDone = (alertConfig: AlertConfig) => {
+    console.log('handleAlertDone', alertConfig.symbol, alertConfig.percentage);
+
+    setAlerts([...alerts, alertConfig]);
   };
 
   const handleAlertClose = () => {
-    setIsAlertOpen(false);
+    setIsAlertModalOpen(false);
     setAlertSymbol('');
   };
 
-  useEffect(() => {
-    console.log('init');
+  const generateAlerts = (prices: StockTick[]) => {
+    //TODO based on alerts, need to check prices and trigger alerts accordingly
+    console.log('generateAlerts', alerts);
+    for (let i = 0; i < alerts.length; i++) {
+      const price = prices.find((p) => p.symbol === alerts[i].symbol);
 
+      if (price) {
+        const currentPercent = price.bid + ' ' + price.open;
+        console.log('found price ', currentPercent);
+
+        // difference / OriginalNumber * 100.
+      }
+    }
+  };
+
+  // Run every X seconds
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      getPrices(selectedSymbols).then(generateAlerts);
+    }, TICK_TIME);
+    return () => clearTimeout(timerId);
+  });
+
+  // Typically will run once on initialization
+  useEffect(() => {
     const stored = sessionStorage.getItem('symbols');
-    console.log('stored ', stored);
     if (stored) {
       const storedArray = JSON.parse(stored);
       setSelectedSymbols(storedArray);
@@ -63,8 +89,11 @@ const Dashboard = () => {
 
     fetch(`${API_URL}/static/tickers`)
       .then((d) => d.json())
-      .then((d) => {
-        setSymbols(d);
+      .then((data: string[]) => {
+        setSymbols(data);
+      })
+      .catch((e) => {
+        console.error(e);
       });
   }, []);
 
@@ -73,8 +102,8 @@ const Dashboard = () => {
       <StocksTableComponent items={symbolPrices} editAlert={handleEditAlert} />
       <StockSelectorComponent symbols={symbols} onAdd={handleAdd} />
       <AlertModalComponent
-        isActive={isAlertOpen}
-        symbolKey={alertSymbol}
+        isActive={isAlertModalOpen}
+        symbolKey={alertModalSymbol}
         onClose={handleAlertClose}
         onDone={handleAlertDone}
       />

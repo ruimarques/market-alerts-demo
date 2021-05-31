@@ -2,7 +2,9 @@ export interface StockTick {
   symbol: string;
   bid: string;
   ask: string;
+  open: string;
   lastVol: string;
+  hasAlerts: boolean;
 }
 
 interface StocksTableProps {
@@ -24,7 +26,7 @@ const StocksTableComponent = (props: StocksTableProps) => {
         </tr>
       </thead>
       <tbody>
-        {props.items.map(({ symbol, bid, ask, lastVol }) => (
+        {props.items.map(({ symbol, bid, ask, lastVol, hasAlerts }) => (
           <tr key={symbol}>
             <td>{symbol}</td>
             <td>{bid}</td>
@@ -32,7 +34,7 @@ const StocksTableComponent = (props: StocksTableProps) => {
             <td>{lastVol}</td>
             <td>
               <label className="checkbox">
-                <input type="checkbox" disabled />
+                <input type="checkbox" disabled checked={hasAlerts} />
               </label>
             </td>
             <td>
