@@ -1,14 +1,16 @@
+import { AlertConfig } from './AlertModal';
+
 export interface StockTick {
   symbol: string;
   bid: string;
   ask: string;
   open: string;
   lastVol: number;
-  hasAlerts: boolean;
 }
 
 interface StocksTableProps {
   items: StockTick[];
+  alerts: AlertConfig[];
   editAlert: (s: string) => void;
   clearAlert: (s: string) => void;
 }
@@ -27,7 +29,7 @@ const StocksTableComponent = (props: StocksTableProps) => {
         </tr>
       </thead>
       <tbody>
-        {props.items.map(({ symbol, bid, ask, lastVol, hasAlerts }) => (
+        {props.items.map(({ symbol, bid, ask, lastVol }) => (
           <tr key={symbol}>
             <td>{symbol}</td>
             <td>{bid}</td>
@@ -35,7 +37,13 @@ const StocksTableComponent = (props: StocksTableProps) => {
             <td>{lastVol}</td>
             <td>
               <label className="checkbox">
-                <input type="checkbox" disabled checked={hasAlerts} />
+                <input
+                  type="checkbox"
+                  disabled
+                  checked={
+                    props.alerts.findIndex((a) => a.symbol === symbol) !== -1
+                  }
+                />
               </label>
             </td>
             <td>

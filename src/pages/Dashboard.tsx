@@ -3,10 +3,9 @@ import moneyMath from 'money-math';
 import StocksTableComponent, { StockTick } from '../components/StocksTable';
 import StockSelectorComponent from '../components/StockSelector';
 import AlertModalComponent, { AlertConfig } from '../components/AlertModal';
-import { API_URL } from '../constants';
+import { API_URL, TICK_TIME } from '../constants';
 import { percentDifference } from '../utils';
-
-const TICK_TIME = 5000;
+import { BidAlerts } from './Alerts';
 
 interface StockTickResponse {
   symbol: string;
@@ -16,28 +15,16 @@ interface StockTickResponse {
   lastVol: number;
 }
 
-const updateSymbolHasAlerts = (
-  prices: StockTick[],
-  symbol: string,
-  status: boolean
-) => {
-  return prices.map((p) => {
-    if (p.symbol === symbol) {
-      p.hasAlerts = status;
-    }
-    return p;
-  });
-};
-
 const Dashboard = () => {
   const [symbols, setSymbols] = useState<string[]>([]);
   const [selectedSymbols, setSelectedSymbols] = useState<string[]>([]);
   const [symbolPrices, setSymbolPrices] = useState<StockTick[]>([]);
 
-  // Alerts state
+  // Alerts-related state
   const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
-  const [alertModalSymbol, setAlertSymbol] = useState('');
+  const [alertModalSymbol, setAlertModalSymbol] = useState('');
   const [alertConfigs, setAlertConfigs] = useState<AlertConfig[]>([]);
+  const [alerts, setAlerts] = useState<BidAlerts[]>([]);
 
   // Converts price values to string amounts with 2 decimal places and adds hasAlerts property
   const decorateStockData = (data: StockTickResponse[]): StockTick[] => {
@@ -47,7 +34,6 @@ const Dashboard = () => {
         bid: moneyMath.floatToAmount(item.bid),
         ask: moneyMath.floatToAmount(item.ask),
         open: moneyMath.floatToAmount(item.open),
-        hasAlerts: false,
       };
     });
   };
@@ -79,7 +65,7 @@ const Dashboard = () => {
   };
 
   const handleEditAlert = (symbol: string) => {
-    setAlertSymbol(symbol);
+    setAlertModalSymbol(symbol);
     setIsAlertModalOpen(true);
   };
 
@@ -87,42 +73,61 @@ const Dashboard = () => {
     console.log('handleAlertDone', newAlert.symbol, newAlert.percentage);
 
     setAlertConfigs([...alertConfigs, newAlert]);
-    // FIXME Not a very efficient way to update a row alert status:
-    setSymbolPrices(updateSymbolHasAlerts(symbolPrices, newAlert.symbol, true));
   };
 
   const handleAlertClear = (symbol: string) => {
     setAlertConfigs(alertConfigs.filter((a) => a.symbol !== symbol));
-    // FIXME Not a very efficient way to update a row alert status:
-    // IDEA: maybe instead of adding hasAlerts to prices data,
-    // i keep it separate and send both objects to table: prices and alerts
-    setSymbolPrices(updateSymbolHasAlerts(symbolPrices, symbol, false));
   };
 
   const handleAlertClose = () => {
     setIsAlertModalOpen(false);
-    setAlertSymbol('');
+    setAlertModalSymbol('');
   };
 
-  const generateAlerts = (prices: StockTick[]) => {
-    //TODO based on configured alerts, need to check prices and trigger alerts accordingly
+  const addNewAlert = (price: StockTick, priceMove: number) => {
+    const updatedAlerts: BidAlerts[] = [
+      ...alerts,
+      {
+        symbol: price.symbol,
+        move: priceMove,
+        time: Date.now(),
+      },
+    ];
+
+    setAlerts(updatedAlerts);
+    sessionStorage.setItem('alerts', JSON.stringify(updatedAlerts));
+  };
+
+  // Based on configured alerts, check prices,
+  // calculate move percentages and trigger alerts accordingly
+  const generateAlerts = (alertConfigs: AlertConfig[], prices: StockTick[]) => {
     console.log('generateAlerts', alertConfigs);
     for (let i = 0; i < alertConfigs.length; i++) {
-      const price = prices.find((p) => p.symbol === alertConfigs[i].symbol);
+      const currentConfig = alertConfigs[i];
+      const price = prices.find((p) => p.symbol === currentConfig.symbol);
 
       if (price) {
         const difference = percentDifference(price.bid, price.open);
+        const differenceAbsolute = Math.abs(difference);
 
         console.log('difference', difference);
+        // We will check for absolute difference,
+        // meaning if a stock moved, for example, either 3% or -3%
+        if (differenceAbsolute > currentConfig.percentage) {
+          console.log('TRIGGRRRRT');
+          // TODO trigger alert
+
+          addNewAlert(price, difference);
+        }
       }
     }
   };
 
-  // Run every X seconds
+  // Run every X seconds, to get updated prices
   useEffect(() => {
     const timerId = setTimeout(() => {
       getPrices(selectedSymbols)
-        .then(generateAlerts)
+        .then((prices) => generateAlerts(alertConfigs, prices))
         .catch((e) => {
           console.error('Failed to get symbols', e);
         });
@@ -155,6 +160,7 @@ const Dashboard = () => {
     <>
       <StocksTableComponent
         items={symbolPrices}
+        alerts={alertConfigs}
         editAlert={handleEditAlert}
         clearAlert={handleAlertClear}
       />
