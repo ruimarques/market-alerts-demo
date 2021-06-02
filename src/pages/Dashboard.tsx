@@ -43,14 +43,12 @@ const Dashboard = () => {
       .then((d) => d.json())
       .then(decorateStockData)
       .then((data: StockTick[]) => {
-        // console.log('decorated getPrices', data);
-        // TODO set alert status > hasAlerts
         setSymbolPrices(data);
         return data;
       });
   };
 
-  const handleAdd = (symbol: string) => {
+  const handleAddSymbol = (symbol: string) => {
     // Only adds new ticker if not present in the list
     const updated = selectedSymbols.includes(symbol)
       ? selectedSymbols
@@ -69,14 +67,21 @@ const Dashboard = () => {
     setIsAlertModalOpen(true);
   };
 
-  const handleAlertDone = (newAlert: AlertConfig) => {
-    console.log('handleAlertDone', newAlert.symbol, newAlert.percentage);
+  const updateAlertConfigs = (config: AlertConfig[]) => {
+    setAlertConfigs(config);
+    sessionStorage.setItem('alertConfigs', JSON.stringify(config));
+  };
 
-    setAlertConfigs([...alertConfigs, newAlert]);
+  const handleAlertDone = (newAlert: AlertConfig) => {
+    const updatedConfig = [...alertConfigs, newAlert];
+
+    updateAlertConfigs(updatedConfig);
   };
 
   const handleAlertClear = (symbol: string) => {
-    setAlertConfigs(alertConfigs.filter((a) => a.symbol !== symbol));
+    const updatedConfig = alertConfigs.filter((a) => a.symbol !== symbol);
+
+    updateAlertConfigs(updatedConfig);
   };
 
   const handleAlertClose = () => {
@@ -110,13 +115,11 @@ const Dashboard = () => {
         const difference = percentDifference(price.bid, price.open);
         const differenceAbsolute = Math.abs(difference);
 
+        // FIXME accuracy of these calculations
         console.log('difference', difference);
         // We will check for absolute difference,
         // meaning if a stock moved, for example, either 3% or -3%
         if (differenceAbsolute > currentConfig.percentage) {
-          console.log('TRIGGRRRRT');
-          // TODO trigger alert
-
           addNewAlert(price, difference);
         }
       }
@@ -137,13 +140,21 @@ const Dashboard = () => {
 
   // Typically will run once on initialization
   useEffect(() => {
-    const stored = sessionStorage.getItem('symbols');
-    if (stored) {
-      const storedArray = JSON.parse(stored);
-      setSelectedSymbols(storedArray);
-      getPrices(storedArray).catch((e) => {
+    const storedSymbols = sessionStorage.getItem('symbols');
+    if (storedSymbols) {
+      const parsedSymbols = JSON.parse(storedSymbols);
+
+      setSelectedSymbols(parsedSymbols);
+      getPrices(parsedSymbols).catch((e) => {
         console.error('Failed to get symbols', e);
       });
+    }
+
+    const storedAlertConfigs = sessionStorage.getItem('alertConfigs');
+    if (storedAlertConfigs) {
+      const parsedConfigs = JSON.parse(storedAlertConfigs);
+
+      setAlertConfigs(parsedConfigs);
     }
 
     fetch(`${API_URL}/static/tickers`)
@@ -164,7 +175,7 @@ const Dashboard = () => {
         editAlert={handleEditAlert}
         clearAlert={handleAlertClear}
       />
-      <StockSelectorComponent symbols={symbols} onAdd={handleAdd} />
+      <StockSelectorComponent symbols={symbols} onAdd={handleAddSymbol} />
       <AlertModalComponent
         isActive={isAlertModalOpen}
         symbolKey={alertModalSymbol}
