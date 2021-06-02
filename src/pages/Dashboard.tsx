@@ -128,6 +128,9 @@ const Dashboard = () => {
 
   // Run every X seconds, to get updated prices
   useEffect(() => {
+    if (selectedSymbols.length === 0) {
+      return;
+    }
     const timerId = setTimeout(() => {
       getPrices(selectedSymbols)
         .then((prices) => generateAlerts(alertConfigs, prices))

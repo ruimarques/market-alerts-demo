@@ -31,7 +31,7 @@ const StockSelectorComponent = (props: StockSelectorProps) => {
             id="SelectSymbol"
           >
             <select value={selection} onChange={handleSelection}>
-              {[...props.symbols.sort()].map((symbol, index) => (
+              {['', ...props.symbols.sort()].map((symbol, index) => (
                 <option key={symbol + index} value={symbol}>
                   {symbol}
                 </option>

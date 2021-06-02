@@ -17,7 +17,7 @@ interface StocksTableProps {
 
 const StocksTableComponent = (props: StocksTableProps) => {
   return (
-    <table className="table is-bordered is-striped">
+    <table className="table is-bordered is-striped" style={{ width: '100%' }}>
       <thead>
         <tr>
           <th>Symbol</th>

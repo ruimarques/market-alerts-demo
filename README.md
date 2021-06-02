@@ -5,14 +5,13 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 ## IMPORTANT NOTE
 
 If you are running [ticker-server](https://github.com/davewthompson/ticker-server) locally, there might be a port incompatibility issue.
-I recommend changing the port it runs as per defined by `src/constants.ts`.
-
-I found no simpler way other than to do some small code change on the provided `ticker-server` script, because the other option would be to do a code change in some Create React App dependency, which would prove to be more time consuming.
+So it is advised that if this client is not communicating correctly with `ticker-server`, make sure they are running in different ports.
 
 The details are:
 
 - both `Create-React-App` `start` script and `ticker-server` script use the same default port: `3000`
-- both provide a single way to configure the port - the `PORT` environment variable. If I set that environment variable, it does not solve the duplicate port problem because both scripts will be reading from it and getting the same value.
+- both provide a single way to configure the port - the `PORT` environment variable. Depending on how you set the environment variable, it might not solve the duplicate port problem because both scripts could be reading from it and getting the same value.
+- To overcome this I have set the port in the npm/yarn start script, so if you use it, everything should work correctly.
 
 ## Available Scripts
 
